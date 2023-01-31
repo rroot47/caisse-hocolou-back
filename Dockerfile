@@ -10,7 +10,7 @@ RUN mvn clean package -DskipTests
 #
 # Package stage
 #
-FROM openjdk:11-jdk-slim
+FROM openjdk:17-jdk-slim
 COPY --from=build /target/caisse-hocolou-back-0.0.1-SNAPSHOT.jar api-hc.jar
 # ENV PORT=8080
 EXPOSE 8082
