@@ -10,7 +10,7 @@ COPY . .
 # Package stage
 #
 FROM openjdk:11-jdk-slim
-COPY --from=build /target/api-hc-0.0.1-SNAPSHOT.jar api-hc.jar
+COPY --from=build /target/caisse-hocolou-back-0.0.1-SNAPSHOT.jar api-hc.jar
 # ENV PORT=8080
 EXPOSE 8082
 ENTRYPOINT ["java","-jar","api-hc.jar"]
