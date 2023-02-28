@@ -4,17 +4,26 @@ import ch.dto.RoleDTO;
 import ch.mappers.RoleMappers;
 import ch.models.Role;
 import ch.repository.RoleReopsitory;
+
 import ch.repository.UtilisateurRepository;
 import ch.dto.ResponseUserDTO;
 import ch.dto.RequestUserDTO;
 import ch.models.Utilisateur;
 import ch.mappers.UtilisateurMappers;
+import net.bytebuddy.utility.RandomString;
+import org.springframework.context.annotation.Bean;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
-import java.util.ArrayList;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -27,27 +36,31 @@ public class UtilisateurServiceImp implements UtilisateurService{
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurMappers  utilisateurMappers;
 
-    private RoleReopsitory roleReopsitory;
-    private RoleMappers roleMappers;
+    private final RoleReopsitory roleReopsitory;
+    private final RoleMappers roleMappers;
 
     private final PasswordEncoder passwordEncoder;
+
+
+    private final JavaMailSender mailSender;
 
     public UtilisateurServiceImp(
             UtilisateurRepository utilisateurRepository,
             UtilisateurMappers utilisateurMappers,
             RoleReopsitory roleReopsitory,
             RoleMappers roleMappers,
-            PasswordEncoder passwordEncoder)
+            PasswordEncoder passwordEncoder, JavaMailSender mailSender)
     {
         this.utilisateurRepository = utilisateurRepository;
         this.utilisateurMappers = utilisateurMappers;
         this.roleReopsitory = roleReopsitory;
         this.roleMappers = roleMappers;
         this.passwordEncoder = passwordEncoder;
+        this.mailSender = mailSender;
     }
 
     @Override
-    public ResponseUserDTO saveUser(RequestUserDTO requestUserDTO) {
+    public ResponseUserDTO saveUser(RequestUserDTO requestUserDTO) throws SQLException {
       /*  Optional<Utilisateur> utilisateurCheck = utilisateurRepository.findUtilisateurByEmail(requestUserDTO.getEmail());
         if (utilisateurCheck.isEmpty()) {
             throw  new RuntimeException("User already exists");
@@ -56,9 +69,10 @@ public class UtilisateurServiceImp implements UtilisateurService{
         if(!utilisateur.getPassword().equals(utilisateur.getConfirmPassword())){
             throw new RuntimeException("Please confirm you password");
         }
+
         utilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
         Utilisateur utilisateursave = utilisateurRepository.save(utilisateur);
-        addRoleToUser(utilisateursave.getEmail(), "USER");
+        addRoleToUser(requestUserDTO.getEmail(), "USER");
         return utilisateurMappers.fromResponseUser(utilisateursave);
     }
 
@@ -113,5 +127,84 @@ public class UtilisateurServiceImp implements UtilisateurService{
         Utilisateur roleDTO = utilisateurRepository.findById(id).get();
         return roleDTO.getRoles();
     }
+
+    /*@Override
+    public void register(RequestUserDTO requestUserDTO, String siteURL) throws MessagingException, UnsupportedEncodingException{
+        Utilisateur utilisateur = utilisateurMappers.fromUtilisateurDTO(requestUserDTO);
+        if(!utilisateur.getPassword().equals(utilisateur.getConfirmPassword())){
+            throw new RuntimeException("Please confirm you password");
+        }
+        utilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
+        String randomCode = RandomString.make(64);
+        utilisateur.setVerificationCode(randomCode);
+        utilisateur.setEnabled(false);
+        utilisateurRepository.save(utilisateur);
+        addRoleToUser(utilisateur.getEmail(), "USER");
+
+        sendVerificationEmail(utilisateur, siteURL);
+    }*/
+
+    @Override
+    public ResponseUserDTO addUser(RequestUserDTO requestUserDTO, String siteURL) throws MessagingException, UnsupportedEncodingException, SQLDataException {
+        Utilisateur utilisateur = utilisateurMappers.fromUtilisateurDTO(requestUserDTO);
+        if(!utilisateur.getPassword().equals(utilisateur.getConfirmPassword())){
+            throw new RuntimeException("Please confirm you password");
+        }
+        utilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
+        String randomCode = RandomString.make(6);
+        utilisateur.setVerificationCode(randomCode);
+        utilisateur.setEnabled(false);
+        Utilisateur utilisateursave = utilisateurRepository.save(utilisateur);
+        addRoleToUser(requestUserDTO.getEmail(), "USER");
+        sendVerificationEmail(utilisateur, siteURL);
+        return utilisateurMappers.fromResponseUser(utilisateursave);
+    }
+
+    @Override
+    public void sendVerificationEmail(Utilisateur requestUserDTO, String siteURL) throws MessagingException, UnsupportedEncodingException {
+        String toAddress = requestUserDTO.getEmail();
+        String fromAddress = "boubousylla2@gmail.com";
+        String senderName = "hocolou";
+        String subject = "Veuillez vérifier votre inscription";
+        String content = "Salut, [[name]],<br>"
+               /* + "Please click the link below to verify your registration:<br>"*/
+                + "Veuillez copier le code ci-dessous pour vérifier votre inscription:<br>"
+                /*+ "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"*/
+                + "<h3>Votre code de verification : \"[[CODE]]\"</h3>"
+                + "Merci,<br>"
+                + "CAISSE HOCOLOU.";
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        helper.setFrom(fromAddress, senderName);
+        helper.setTo(toAddress);
+        helper.setSubject(subject);
+
+        content = content.replace("[[name]]", requestUserDTO.getPrenom());
+        //String verifyURL = siteURL + "/verify?code=" + requestUserDTO.getVerificationCode();
+
+        String verifyCode = requestUserDTO.getVerificationCode();
+        content = content.replace("[[CODE]]", verifyCode);
+
+        helper.setText(content, true);
+
+        mailSender.send(message);
+    }
+
+    @Override
+    public boolean verify(String verificationCode) {
+        Utilisateur user = utilisateurRepository.findByVerificationCode(verificationCode);
+        if (user == null || user.isEnabled()) {
+            return false;
+        } else {
+            user.setVerificationCode(null);
+            user.setEnabled(true);
+            utilisateurRepository.save(user);
+            return true;
+        }
+
+    }
+
 
 }

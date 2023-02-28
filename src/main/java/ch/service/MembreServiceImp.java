@@ -1,7 +1,6 @@
 package ch.service;
 
 import ch.dto.AllMemberDTO;
-import ch.models.Adherant;
 import ch.repository.MembreRepository;
 import ch.dto.MembreDTO;
 import ch.models.Membre;
@@ -14,17 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
 public class MembreServiceImp implements  MembreService{
-    private MembreRepository membreRepository;
-    private MembreMappers membreMappers;
+    private final MembreRepository membreRepository;
+    private final MembreMappers membreMappers;
 
     public MembreServiceImp(MembreRepository membreRepository, MembreMappers membreMappers) {
         this.membreRepository = membreRepository;
@@ -33,20 +29,31 @@ public class MembreServiceImp implements  MembreService{
 
     @Override
     public MembreDTO saveMembre(MembreDTO membreDTO) {
+        int somme=0;
         Membre membre = membreMappers.fromMembreDTO(membreDTO);
+        somme+=membre.getMontantAdhesion();
+        somme += membre.getAdherant().stream().mapToInt(adherant -> (int) adherant.getMontant()).sum();
+        membre.setMontantTotals(somme);
         Membre saveMembre = membreRepository.save(membre);
         return membreMappers.fromMembre(saveMembre);
     }
 
     @Override
     public MembreDTO updateMembre(Long membre_id, MembreDTO membreDTO) {
+        int somme =0;
+        int saveMontant= 0;
+        int saveMontantDTO = 0;
         Membre membre = membreRepository.findById(membre_id).get();
+        saveMontant += membre.getMontantTotals();
         membre.setNom(membreDTO.getNom()==null? membre.getNom():membreDTO.getNom());
         membre.setPrenom(membreDTO.getPrenom()==null? membre.getPrenom():membreDTO.getPrenom());
         membre.setTelephone(membreDTO.getTelephone()==0? membre.getTelephone():membreDTO.getTelephone());
         membre.setDomicile(membreDTO.getDomicile()==null? membre.getDomicile():membreDTO.getDomicile());
         membre.setMontantAdhesion(membreDTO.getMontantAdhesion()==0?membre.getMontantAdhesion():membreDTO.getMontantAdhesion());
+        saveMontantDTO+=membreDTO.getAdherant().stream().mapToInt(adherant -> (int) adherant.getMontant()).sum();
         membre.setAdherant(membreDTO.getAdherant()==null?membre.getAdherant(): membreDTO.getAdherant());
+        somme = saveMontant+saveMontantDTO;
+        membre.setMontantTotals(somme);
         membreRepository.save(membre);
         return membreMappers.fromMembre(membre);
     }
@@ -55,15 +62,16 @@ public class MembreServiceImp implements  MembreService{
     @Override
     public List<AllMemberDTO> getAllMembres() {
         List<Membre> members = membreRepository.findAll();
+
         return members.stream()
-                    .map(membre -> membreMappers.fromAllMembre(membre))
+                    .map(membreMappers::fromAllMembre)
                     .collect(Collectors.toList());
     }
     public List<AllMemberDTO> getPageMembres(Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Membre> pageMembre = membreRepository.findAll(pageable);
         if (pageMembre.hasContent()){
-            return pageMembre.getContent().stream().map(membre -> membreMappers.fromAllMembre(membre))
+            return pageMembre.getContent().stream().map(membreMappers::fromAllMembre)
                     .collect(Collectors.toList());
         }else {
             return new ArrayList<AllMemberDTO>();
@@ -86,6 +94,10 @@ public class MembreServiceImp implements  MembreService{
         if(membre_id!=0){
             membreRepository.deleteById(membre_id);
         }
+    }
+    @Override
+    public double montantTotol() {
+      return  membreRepository.montantTotol();
     }
 
 }

@@ -1,17 +1,12 @@
 package ch.dto;
 
 import ch.models.Adherant;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Set;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class MembreDTO {
+public class ResponseMembreDTO {
+
+    private Long id;
     private String nom;
     private String prenom;
     private int telephone;
@@ -20,4 +15,5 @@ public class MembreDTO {
     //private Adherant[] adherant;
     //private Set<Adherant> adherant;
     private List<Adherant> adherant;
+    private double montantTotals;
 }

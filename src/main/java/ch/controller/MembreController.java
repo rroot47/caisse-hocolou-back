@@ -39,6 +39,11 @@ public class MembreController {
         return null;
     }
 
+    @GetMapping("/membre/montantTotal")
+    public double montantTotol(){
+        return membreService.montantTotol();
+    }
+
     @PostMapping("/membre")
     public MembreDTO addMembre(@RequestBody MembreDTO membreDTO){
         return membreService.saveMembre(membreDTO);

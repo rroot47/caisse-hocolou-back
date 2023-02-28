@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,5 +19,7 @@ public class AllMemberDTO {
     private String domicile;
     private  double montantAdhesion;
     //private Adherant[] adherant;
-    private Set<Adherant> adherant;
+    //private Set<Adherant> adherant;
+    private List<Adherant> adherant;
+    private double montantTotals=0;
 }

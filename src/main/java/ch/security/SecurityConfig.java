@@ -39,10 +39,10 @@ import java.util.Optional;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig{
 
-    private  RsaKeysConfig rsaKeysConfig;
-    private PasswordEncoder passwordEncoder;
+    private final RsaKeysConfig rsaKeysConfig;
+    private final PasswordEncoder passwordEncoder;
 
-    private UtilisateurService utilisateurService;
+    private final UtilisateurService utilisateurService;
 
     public SecurityConfig(RsaKeysConfig rsaKeysConfig, PasswordEncoder passwordEncoder, UtilisateurService utilisateurService) {
         this.rsaKeysConfig = rsaKeysConfig;
@@ -78,7 +78,7 @@ public class SecurityConfig{
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeRequests(auth->auth.antMatchers(HttpMethod.OPTIONS).permitAll())
-                .authorizeRequests(auth->auth.antMatchers("/auth/**","/swagger-ui/**","/hc/user", "/swagger-resources/**", "/v3/api-docs/**").permitAll())
+                .authorizeRequests(auth->auth.antMatchers("/auth/**","/hc/register","/hc/verify","/swagger-ui/**","/hc/user", "/swagger-resources/**", "/v3/api-docs/**").permitAll())
                 .authorizeRequests(auth->auth.anyRequest().authenticated())
                 .sessionManagement(sess->sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)

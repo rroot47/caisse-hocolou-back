@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private UtilisateurRepository utilisateurRepository;
+    private final UtilisateurRepository utilisateurRepository;
 
     public UserDetailsServiceImpl(UtilisateurRepository utilisateurRepository) {
         this.utilisateurRepository = utilisateurRepository;
@@ -27,7 +27,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (utilisateur.isEmpty()) {
             throw new UsernameNotFoundException("Invalid user");
         }
-        return  new User(utilisateur.get().getEmail(), utilisateur.get().getPassword(),new ArrayList<>());
+      /*  UserDetails userDetails = User.withUsername(utilisateur.get().getEmail())
+                .password(utilisateur.get().getPassword())
+                .disabled(false)
+                .authorities(new ArrayList<>())
+                .build();*/
+        return  new User(utilisateur.get().getEmail(), utilisateur.get().getPassword(), new ArrayList<>());
     }
 
 }

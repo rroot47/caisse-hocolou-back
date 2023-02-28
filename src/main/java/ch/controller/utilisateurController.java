@@ -9,9 +9,15 @@ import ch.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
@@ -49,7 +55,7 @@ public class utilisateurController {
 
     @PostMapping("/user")
     //@PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseUserDTO addUser(@RequestBody RequestUserDTO requestUserDTO){
+    public ResponseUserDTO addUser(@RequestBody RequestUserDTO requestUserDTO) throws SQLException {
         return utilisateurService.saveUser(requestUserDTO);
     }
 
@@ -71,5 +77,22 @@ public class utilisateurController {
         if(user_id!=0){
             utilisateurService.deleteUser(user_id);
         }
+    }
+
+    @PostMapping("/register")
+    public ResponseUserDTO register(@RequestBody  RequestUserDTO requestUserDTO, HttpServletRequest request)
+            throws UnsupportedEncodingException, MessagingException, SQLDataException {
+        return utilisateurService.addUser(requestUserDTO, getSiteURL(request));
+        //return "register_success";
+    }
+
+    @GetMapping("/verify")
+    public boolean verifyUser(@Param("code") String code) {
+        return utilisateurService.verify(code);
+    }
+
+    private String getSiteURL(HttpServletRequest request) {
+        String siteURL = request.getRequestURL().toString();
+        return siteURL.replace(request.getServletPath(), "");
     }
 }

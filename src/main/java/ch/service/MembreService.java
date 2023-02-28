@@ -13,4 +13,5 @@ public interface MembreService {
     public List<AllMemberDTO> getPageMembres(Integer pageNumber, Integer pageSize);
     MembreDTO getMembre(Long membre_id);
     void deleteMembre(long membre_id);
+    double montantTotol();
 }

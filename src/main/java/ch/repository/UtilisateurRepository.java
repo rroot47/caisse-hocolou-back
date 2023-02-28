@@ -19,4 +19,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     @Query("select u from Utilisateur u where u.id = :id")
     List<Utilisateur> getUserAndRoleName(Long id);
+
+    @Query("SELECT u FROM Utilisateur u WHERE u.verificationCode = ?1")
+    public Utilisateur findByVerificationCode(String code);
 }

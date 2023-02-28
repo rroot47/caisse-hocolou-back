@@ -3,16 +3,17 @@ package ch.models;
 import javax.persistence.*;
 
 import com.vladmihalcea.hibernate.type.json.JsonType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @TypeDef(name = "json", typeClass = JsonType.class)
@@ -30,5 +31,8 @@ public class Membre  {
     @Type(type = "json")
     @Column(columnDefinition = "jsonb")
     //private Adherant[] adherant;
-    private Set<Adherant> adherant;
+    //private Set<Adherant> adherant;
+    private List<Adherant> adherant;
+    //@Column(nullable = true)
+    private double montantTotals;
 }
