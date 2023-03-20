@@ -11,5 +11,6 @@ public interface DepenseService {
     ResponseDepenseDTO updateDepense(Long id, RequestDepenseDTO requestDepenseDTO);
     List<ResponseDepenseDTO> getAllDepense();
     ResponseDepenseDTO getDepense(Long id);
+    double montantTotolDepense();
 
 }

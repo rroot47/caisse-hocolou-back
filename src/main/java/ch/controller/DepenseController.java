@@ -36,8 +36,18 @@ public class DepenseController {
         return depenseService.getDepense(id);
     }
 
+    @GetMapping("/totalDepense")
+    double montantTotolDepense(){
+        return depenseService.montantTotolDepense();
+    }
+
     @PostMapping("/depense")
     private ResponseDepenseDTO addDepense(@RequestBody RequestDepenseDTO requestDepenseDTO){
         return depenseService.addDepense(requestDepenseDTO);
+    }
+
+    @PatchMapping("/depense/{id}")
+    public ResponseDepenseDTO updateDepense(@PathVariable("id") Long id, @RequestBody RequestDepenseDTO requestDepenseDTO){
+        return depenseService.updateDepense(id, requestDepenseDTO);
     }
 }

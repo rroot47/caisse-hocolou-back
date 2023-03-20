@@ -2,8 +2,11 @@ package ch.mappers;
 
 import ch.dto.AllMemberDTO;
 import ch.dto.MembreDTO;
+import ch.dto.PaginationDTO;
 import ch.models.Membre;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class MembreMappers {
@@ -18,8 +21,6 @@ public class MembreMappers {
         CopyMappers.copy(membre, membreDTO);
         return membreDTO;
     }
-
-
 
     public Membre fromMembreDTO(MembreDTO membreDTO){
         Membre membre=new Membre();

@@ -33,4 +33,8 @@ public interface UtilisateurService {
     public void sendVerificationEmail(Utilisateur requestUserDTO, String siteURL) throws MessagingException, UnsupportedEncodingException;
 
     public ResponseUserDTO addUser(RequestUserDTO requestUserDTO, String siteURL) throws MessagingException, UnsupportedEncodingException, SQLDataException;
+
+    ResponseUserDTO getUserByCode(String code);
+
+    Optional<Utilisateur>  getUserByEmail(String email);
 }

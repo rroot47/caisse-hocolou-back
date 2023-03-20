@@ -5,6 +5,7 @@ import ch.dto.RequestUserDTO;
 import ch.dto.RoleDTO;
 import ch.dto.UserRoleDTO;
 import ch.models.Role;
+import ch.models.Utilisateur;
 import ch.service.UtilisateurService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -20,6 +21,7 @@ import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("hc")
@@ -40,6 +42,10 @@ public class utilisateurController {
         return utilisateurService.getAllUser();
     }
 
+    @GetMapping("/user")
+    public ResponseUserDTO getUserByCode(@Param("code") String code){
+        return utilisateurService.getUserByCode(code);
+    }
     @GetMapping("/user/{id}")
     public ResponseUserDTO getUser(@PathVariable("id")  Long user_id){
         if(user_id!=0){
@@ -47,17 +53,20 @@ public class utilisateurController {
         }
         return null;
     }
-
+    @GetMapping("/user/email")
+    public Optional<Utilisateur> findUtilisateurEmail(@Param("email") String email){
+        return utilisateurService.getUserByEmail(email);
+    }
     @GetMapping("/role/{id}")
     public Collection<Role> getRoleName(@PathVariable("id") Long id){
         return utilisateurService.getRoleName(id);
     }
 
-    @PostMapping("/user")
+   /* @PostMapping("/user")
     //@PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseUserDTO addUser(@RequestBody RequestUserDTO requestUserDTO) throws SQLException {
         return utilisateurService.saveUser(requestUserDTO);
-    }
+    }*/
 
     @PostMapping("/role")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
@@ -79,7 +88,7 @@ public class utilisateurController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping("/user")
     public ResponseUserDTO register(@RequestBody  RequestUserDTO requestUserDTO, HttpServletRequest request)
             throws UnsupportedEncodingException, MessagingException, SQLDataException {
         return utilisateurService.addUser(requestUserDTO, getSiteURL(request));
@@ -87,8 +96,8 @@ public class utilisateurController {
     }
 
     @GetMapping("/verify")
-    public boolean verifyUser(@Param("code") String code) {
-        return utilisateurService.verify(code);
+    public boolean verifyUser(@Param("codeVerify") String codeVerify) {
+        return utilisateurService.verify(codeVerify);
     }
 
     private String getSiteURL(HttpServletRequest request) {

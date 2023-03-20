@@ -21,12 +21,9 @@ public class DepenseServiceImpl implements DepenseService{
     private final DepenseRepository depenseRepository;
     private final DepenseMappers depenseMappers;
 
-    private final MembreService membreService;
-
-    public DepenseServiceImpl(DepenseRepository depenseRepository, DepenseMappers depenseMappers, MembreService membreService) {
+    public DepenseServiceImpl(DepenseRepository depenseRepository, DepenseMappers depenseMappers) {
         this.depenseRepository = depenseRepository;
         this.depenseMappers = depenseMappers;
-        this.membreService = membreService;
     }
 
 
@@ -39,7 +36,15 @@ public class DepenseServiceImpl implements DepenseService{
 
     @Override
     public ResponseDepenseDTO updateDepense(Long id, RequestDepenseDTO requestDepenseDTO) {
-        return null;
+        Depense depense = depenseRepository.findById(id).get();
+        depense.setTypeDepense(requestDepenseDTO.getTypeDepense()==null?depense.getTypeDepense():requestDepenseDTO.getTypeDepense());
+        depense.setDescription(requestDepenseDTO.getDescription()==null?depense.getDescription():requestDepenseDTO.getDescription());
+        depense.setNom(requestDepenseDTO.getNom()==null?depense.getNom(): requestDepenseDTO.getNom());
+        depense.setPrenom(requestDepenseDTO.getPrenom()==null?depense.getPrenom(): requestDepenseDTO.getPrenom());
+        depense.setDate(requestDepenseDTO.getDate()==null?depense.getDate(): requestDepenseDTO.getDate());
+        depense.setSomme(requestDepenseDTO.getSomme()==0?depense.getSomme(): requestDepenseDTO.getSomme());
+        depenseRepository.save(depense);
+        return depenseMappers.fromResponseDepense(depense);
     }
 
     @Override
@@ -56,6 +61,11 @@ public class DepenseServiceImpl implements DepenseService{
             return depenseMappers.fromResponseDepense(depense);
         }
         return  null;
+    }
+
+    @Override
+    public double montantTotolDepense() {
+        return depenseRepository.montantTotolDepense();
     }
 
 }

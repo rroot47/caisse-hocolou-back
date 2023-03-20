@@ -161,12 +161,26 @@ public class UtilisateurServiceImp implements UtilisateurService{
     }
 
     @Override
+    public ResponseUserDTO getUserByCode(String code) {
+        if(code==null){
+            return null;
+        }
+        Utilisateur utilisateur = utilisateurRepository.findByVerificationCode(code);
+        return utilisateurMappers.fromResponseUser(utilisateur);
+    }
+
+    @Override
+    public Optional<Utilisateur> getUserByEmail(String email) {
+        return utilisateurRepository.findUtilisateurByEmail(email);
+    }
+
+    @Override
     public void sendVerificationEmail(Utilisateur requestUserDTO, String siteURL) throws MessagingException, UnsupportedEncodingException {
         String toAddress = requestUserDTO.getEmail();
         String fromAddress = "boubousylla2@gmail.com";
         String senderName = "hocolou";
         String subject = "Veuillez vérifier votre inscription";
-        String content = "Salut, [[name]],<br>"
+        String content = "Bonjour [[name]],<br>"
                /* + "Please click the link below to verify your registration:<br>"*/
                 + "Veuillez copier le code ci-dessous pour vérifier votre inscription:<br>"
                 /*+ "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"*/
@@ -198,7 +212,7 @@ public class UtilisateurServiceImp implements UtilisateurService{
         if (user == null || user.isEnabled()) {
             return false;
         } else {
-            user.setVerificationCode(null);
+           // user.setVerificationCode(null);
             user.setEnabled(true);
             utilisateurRepository.save(user);
             return true;

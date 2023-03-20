@@ -78,7 +78,7 @@ public class SecurityConfig{
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeRequests(auth->auth.antMatchers(HttpMethod.OPTIONS).permitAll())
-                .authorizeRequests(auth->auth.antMatchers("/auth/**","/hc/register","/hc/verify","/swagger-ui/**","/hc/user", "/swagger-resources/**", "/v3/api-docs/**").permitAll())
+                .authorizeRequests(auth->auth.antMatchers("/auth/**","/hc/register","/hc/verify","/swagger-ui/**","/hc/user", "/hc/user/email", "/swagger-resources/**", "/v3/api-docs/**").permitAll())
                 .authorizeRequests(auth->auth.anyRequest().authenticated())
                 .sessionManagement(sess->sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)

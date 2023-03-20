@@ -1,6 +1,7 @@
 package ch.service;
 
 import ch.dto.AllMemberDTO;
+import ch.dto.PaginationDTO;
 import ch.repository.MembreRepository;
 import ch.dto.MembreDTO;
 import ch.models.Membre;
@@ -40,10 +41,11 @@ public class MembreServiceImp implements  MembreService{
 
     @Override
     public MembreDTO updateMembre(Long membre_id, MembreDTO membreDTO) {
-        int somme =0;
-        int saveMontant= 0;
-        int saveMontantDTO = 0;
+        double somme =0;
+        double saveMontant= 0;
+        double saveMontantDTO = 0;
         Membre membre = membreRepository.findById(membre_id).get();
+        membre.setMontantTotals(somme);
         saveMontant += membre.getMontantTotals();
         membre.setNom(membreDTO.getNom()==null? membre.getNom():membreDTO.getNom());
         membre.setPrenom(membreDTO.getPrenom()==null? membre.getPrenom():membreDTO.getPrenom());
@@ -52,7 +54,7 @@ public class MembreServiceImp implements  MembreService{
         membre.setMontantAdhesion(membreDTO.getMontantAdhesion()==0?membre.getMontantAdhesion():membreDTO.getMontantAdhesion());
         saveMontantDTO+=membreDTO.getAdherant().stream().mapToInt(adherant -> (int) adherant.getMontant()).sum();
         membre.setAdherant(membreDTO.getAdherant()==null?membre.getAdherant(): membreDTO.getAdherant());
-        somme = saveMontant+saveMontantDTO;
+        somme = saveMontant+saveMontantDTO+membre.getMontantAdhesion();
         membre.setMontantTotals(somme);
         membreRepository.save(membre);
         return membreMappers.fromMembre(membre);
@@ -60,24 +62,24 @@ public class MembreServiceImp implements  MembreService{
     //List<Integer> listAnneMembre = Arrays.stream(membre.getAdherant()).map(Adherant::getAnnee).toList();
     // List<Integer> listAnneMembreDTO = Arrays.stream(membreDTO.getAdherant()).map(Adherant::getAnnee).toList();
     @Override
+    public PaginationDTO getAllMembresPage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Membre> members = membreRepository.findAll(pageable);
+        List<Membre> membreList = members.getContent();
+        List<AllMemberDTO> allMemberDTOS = membreList.stream().map(membreMappers::fromAllMembre).toList();
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setAllMemberDTOS(allMemberDTOS);
+        paginationDTO.setCurrentPage(page);
+        paginationDTO.setPageSize(size);
+        paginationDTO.setTotalPages(members.getTotalPages());
+        return paginationDTO;//members.stream().map(membreMappers::fromAllMembre).collect(Collectors.toList());
+    }
+
+    @Override
     public List<AllMemberDTO> getAllMembres() {
-        List<Membre> members = membreRepository.findAll();
-
-        return members.stream()
-                    .map(membreMappers::fromAllMembre)
-                    .collect(Collectors.toList());
+        List<Membre> membres = membreRepository.findAll();
+        return membres.stream().map(membreMappers::fromAllMembre).collect(Collectors.toList());
     }
-    public List<AllMemberDTO> getPageMembres(Integer pageNumber, Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Membre> pageMembre = membreRepository.findAll(pageable);
-        if (pageMembre.hasContent()){
-            return pageMembre.getContent().stream().map(membreMappers::fromAllMembre)
-                    .collect(Collectors.toList());
-        }else {
-            return new ArrayList<AllMemberDTO>();
-        }
-    }
-
 
     @Override
     public MembreDTO getMembre(Long membre_id) {

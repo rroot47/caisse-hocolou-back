@@ -2,6 +2,7 @@ package ch.controller;
 
 import ch.dto.AllMemberDTO;
 import ch.dto.MembreDTO;
+import ch.dto.PaginationDTO;
 import ch.service.MembreService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,10 +28,12 @@ public class MembreController {
         return membreService.getAllMembres();
     }
 
-    @GetMapping("/pagemembres/{pageNumber}/{pageSize}")
-    public List<AllMemberDTO> getPageMembres(@PathVariable("pageNumber") Integer pageNumber, @PathVariable("pageSize") Integer pageSize){
-        return membreService.getPageMembres(pageNumber, pageSize);
+    @GetMapping("/membres/pages")
+    public PaginationDTO getAllMembrePages(@RequestParam(value = "page", defaultValue = "0") int page,
+                                      @RequestParam(value = "size", defaultValue = "10")int size){
+        return membreService.getAllMembresPage(page, size);
     }
+
     @GetMapping("/membre/{id}")
     public MembreDTO getMembre(@PathVariable("id")  Long member_id){
         if(member_id!=0){
