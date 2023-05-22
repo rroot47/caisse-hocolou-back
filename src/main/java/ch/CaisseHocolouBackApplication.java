@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
         info = @Info(title = "API HOCOLOU CAISSE"),
         servers = @Server(
              url = "http://localhost:8082/"
-
                // url = "http://ec2-3-90-80-27.compute-1.amazonaws.com:8082/"
         )
 )
